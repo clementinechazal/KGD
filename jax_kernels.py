@@ -173,3 +173,43 @@ def ddk_laplace(x, y, sigma):  # Gram matrix of nabla_2 . nabla_1 k(x,y), dim = 
         K[non_zero_mask] * ((d - 1) / (sigma**2 * dist[non_zero_mask]) - 1 / sigma**3)
     )
     return second_derivative
+
+
+
+
+###### NORME KERNEL ######
+
+def k_norme(x, y):  # Gram matrix for norme kernel
+    X_norm = jnp.sum(x**2, axis=1)
+    Y_norm = jnp.sum(y**2, axis=1)
+    xy = jnp.dot(x, y.T)
+    dist = X_norm[:, None] + Y_norm[None, :] - 2 * xy
+    return jnp.sqrt(dist)  # Adding a small constant to avoid division by zero
+
+
+def dk_norme(x, y):  # Gram matrix of nabla_1 k(x,y), dim = (n,m,d)
+    x_mat = jnp.tile(x, (len(y), 1, 1))
+    y_mat = jnp.tile(y, (len(x), 1, 1))
+    x_mat = jnp.transpose(x_mat, axes=(1, 0, 2))
+    diff = y_mat - x_mat
+    dist = jnp.linalg.norm(diff, axis=2)  + np.identity(len(x)) # Adding a small constant to avoid division by zero
+    grad = -diff / dist[:, :, None]  # Gradient calculation
+    return grad
+
+def ddk_norme(x, y):  # Gram matrix of nabla_2 . nabla_1 k(x,y), dim = (n,m)
+    x_mat = jnp.tile(x, (len(y), 1, 1))
+    y_mat = jnp.tile(y, (len(x), 1, 1))
+    x_mat = jnp.transpose(x_mat, axes=(1, 0, 2))
+    diff = y_mat - x_mat
+    dist = jnp.linalg.norm(diff, axis=2) + np.identity(len(x))  # Adding a small constant to avoid division by zero
+    K = jnp.sqrt(dist)  # Norme kernel values
+    d = x.shape[1]  # Dimensionality of the input data
+
+    second_derivative = jnp.zeros((x.shape[0], y.shape[0]))  # Initialize second derivative matrix to zero
+    non_zero_mask = dist > 0  # Mask for non-zero distances
+
+    second_derivative = second_derivative.at[non_zero_mask].set(
+        K[non_zero_mask] * ((d - 1) / (dist[non_zero_mask]**(3/2)) - 1 / (dist[non_zero_mask]**(5/2)))
+    )
+
+    return second_derivative
