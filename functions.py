@@ -88,18 +88,26 @@ class F_P:
         
 
     
-class NumericalExperiment:
-    def __init__(self,NumericalMethod,s_PQ, k, q0, L):
-        self.s_PQ = s_PQ
-        self.k = k
-        self.q0 = q0
-        self.L = L
-        self.k_PQ = GradientKernel(s_PQ, k)
-        self.KGD = KernelGradientDiscrepancy(self.gradient_kernel)
-        self.f_p = F_P(q0, L)
-        self.NumericalMethod = NumericalMethod
+# class NumericalExperiment:
+#     def __init__(self,NumericalMethod,s_PQ, k, q0, L):
+#         self.s_PQ = s_PQ
+#         self.k = k
+#         self.q0 = q0
+#         self.L = L
+#         self.k_PQ = GradientKernel(s_PQ, k)
+#         self.KGD = KernelGradientDiscrepancy(self.gradient_kernel)
+#         self.f_p = F_P(q0, L)
+#         self.NumericalMethod = NumericalMethod
 
-    def simulation(self, X):
+#         self.F_P = F_P(self.q0, self.L)
+#         self.k_PQ = GradientKernel(s_PQ, k)
+#         self.KGD = KernelGradientDiscrepancy(self.k_PQ)
+
+
+
+
+#     def simulation(self,X):
         
-        if self.NumericalMethod == "MFLD":
-            
+#         if self.NumericalMethod == "MFLD":
+
+

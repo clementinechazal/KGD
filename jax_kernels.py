@@ -3,6 +3,10 @@ import jax.numpy as jnp
 from jax import jit, vmap
 from jax import jacfwd, jacrev
 
+
+
+################ KERNEL GRADIENT DISCREPANCY ################
+
 class GradientKernel:
     def __init__(self, gradV, k):
         self.gradV = gradV
@@ -55,6 +59,7 @@ class KernelGradientDiscrepancy:
     
 
 
+################# KERNEL STEIN DISCREPANCY ################
 class SteinKernel:
     def __init__(self, dlogp, k):
         self.dlogp = dlogp
@@ -92,6 +97,7 @@ class KernelSteinDiscrepancy:
         k0_tril, k0_diag, _, _ = self.k0mat(x)
         k0_sum = np.sum(k0_tril) * 2 + np.sum(k0_diag)
         return np.sqrt(k0_sum) / x.shape[0]
+    
 
     def cumeval(self, x):
         n = x.shape[0]
@@ -191,8 +197,8 @@ def dk_norme(x, y):  # Gram matrix of nabla_1 k(x,y), dim = (n,m,d)
     x_mat = jnp.tile(x, (len(y), 1, 1))
     y_mat = jnp.tile(y, (len(x), 1, 1))
     x_mat = jnp.transpose(x_mat, axes=(1, 0, 2))
-    diff = y_mat - x_mat
-    dist = jnp.linalg.norm(diff, axis=2)  + np.identity(len(x)) # Adding a small constant to avoid division by zero
+    diff = y_mat - x_mat  # Transpose to match dimensions
+    dist = jnp.linalg.norm(diff, axis=2)  + 1e-7 # Adding a small constant to avoid division by zero
     grad = -diff / dist[:, :, None]  # Gradient calculation
     return grad
 
@@ -201,7 +207,7 @@ def ddk_norme(x, y):  # Gram matrix of nabla_2 . nabla_1 k(x,y), dim = (n,m)
     y_mat = jnp.tile(y, (len(x), 1, 1))
     x_mat = jnp.transpose(x_mat, axes=(1, 0, 2))
     diff = y_mat - x_mat
-    dist = jnp.linalg.norm(diff, axis=2) + np.identity(len(x))  # Adding a small constant to avoid division by zero
+    dist = jnp.linalg.norm(diff, axis=2) + 1e-7  # Adding a small constant to avoid division by zero
     K = jnp.sqrt(dist)  # Norme kernel values
     d = x.shape[1]  # Dimensionality of the input data
 
